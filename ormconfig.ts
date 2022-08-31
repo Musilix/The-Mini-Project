@@ -1,23 +1,16 @@
+import path from 'path';
 import { DataSourceOptions } from 'typeorm';
 
-// TODO: SWITCH TO USE ENV VARIABLES
-const dataSrcOptions: DataSourceOptions = {
+export default {
   type: 'postgres',
   port: 8888,
-  host: 'localhost',
+  host: process.env.POSTGRESHOST,
   username: process.env.POSTGRESUSER,
   password: process.env.POSTGRESPASS,
-  database: 'theminiproject',
+  database: process.env.POSTGRESDB,
   logging: false,
-  synchronize: true,
-  entities: ['src/modules/*/entity/**/*.ts'],
+  synchronize: false,
+  entities: [path.join(__dirname, './modules/**/entity.js')],
   migrations: ['src/migration/**/*.ts'],
   subscribers: ['src/subscriber/**/*.ts'],
-  //  "cli": {
-  //     "entitiesDir": "src/entity",
-  //     "migrationsDir": "src/migration",
-  //     "subscribersDir": "src/subscriber"
-  //  }
-};
-
-export default dataSrcOptions;
+} as DataSourceOptions;

@@ -1,5 +1,6 @@
+import 'reflect-metadata';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-
+// import messages from '../messages/entity';
 @Entity()
 export default class users {
   @PrimaryGeneratedColumn()

@@ -27,6 +27,7 @@ coverage
 build/Release
 
 /dist
+.env
 
 # Dependency directories
 node_modules
