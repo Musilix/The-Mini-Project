@@ -12,7 +12,7 @@ export default class messages {
   message_id: number;
 
   @Column()
-  user_id: string;
+  user_id: number;
 
   @Column()
   message: string;

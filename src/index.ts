@@ -14,15 +14,12 @@ const server: FastifyInstance = fastify();
 
 // server.register(fp(fastifySwagger), SwaggerConfig);//
 server.register(dbConnector);
-console.log('db registered');
+console.info('db registered');
+
 server.register(MessagesRoutes);
 server.register(UsersRoute);
 
-server.get('/ping', (_, res) => {
-  res.send('PONG');
-});
-
-// listen on 8080 locallys
+// listen on 8080 locally
 server.listen({ port: 8080 }, (err, address) => {
   if (err) {
     console.error(err);

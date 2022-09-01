@@ -1,16 +1,16 @@
-import path from 'path';
+// import path from 'path';
 import { DataSourceOptions } from 'typeorm';
 
 export default {
   type: 'postgres',
   port: 8888,
-  host: process.env.POSTGRESHOST,
-  username: process.env.POSTGRESUSER,
-  password: process.env.POSTGRESPASS,
-  database: process.env.POSTGRESDB,
-  logging: false,
+  host: 'localhost',
+  username: 'kareem',
+  password: '560688Ks!',
+  database: 'theminiproject',
+  logging: true,
   synchronize: false,
-  entities: [path.join(__dirname, './modules/**/entity.js')],
+  entities: ['dist/src/modules/**/entity.js'],
   migrations: ['src/migration/**/*.ts'],
   subscribers: ['src/subscriber/**/*.ts'],
 } as DataSourceOptions;
