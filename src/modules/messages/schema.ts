@@ -1,4 +1,4 @@
-const PostMovieBody = {
+const PostBody = {
   type: 'object',
   properties: {
     message: { type: 'string' },
@@ -7,6 +7,6 @@ const PostMovieBody = {
 
 export const postMessageSchema = {
   schema: {
-    body: PostMovieBody,
+    body: PostBody,
   },
 };

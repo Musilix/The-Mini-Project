@@ -20,6 +20,15 @@ console.info('db registered');
 server.register(MessagesRoutes);
 server.register(UsersRoute);
 
+server.get('/', async () => {
+  return {
+    statusCode: 200,
+    code: 'Success',
+    message: 'hello mawmaw',
+    time: new Date(),
+  };
+});
+
 // listen on 8080 locally
 server.listen({ port: port }, (err, address) => {
   if (err) {
