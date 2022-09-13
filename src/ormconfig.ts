@@ -14,8 +14,8 @@ export default {
   logging: true,
   synchronize: false,
   ssl: { ...getSSLConfig() },
-  entities: ['dist/src/modules/**/entity.js'],
-  migrations: ['dist/src/migration/**/*.ts'],
+  entities: ['dist/modules/**/entity.js'],
+  migrations: ['dist/migration/**/*.ts'],
   subscribers: ['src/subscriber/**/*.ts'],
 } as DataSourceOptions;
 

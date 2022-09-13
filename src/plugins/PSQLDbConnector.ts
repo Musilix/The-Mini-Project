@@ -6,7 +6,7 @@ import { DataSource, Repository } from 'typeorm';
 import messages from '../modules/messages/entity';
 import users from '../modules/users/entity';
 
-import typeormConfig from '../../ormconfig';
+import typeormConfig from '../ormconfig';
 
 // import { __prod__ } from '../../constants';
 // need to do some declaration merging to append new psqlDB decorator to fastify instance
