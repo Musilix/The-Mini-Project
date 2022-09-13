@@ -21,7 +21,7 @@ declare module 'fastify' {
 
 async function dbConnector(fastify: FastifyInstance) {
   try {
-    const AppDataSource = await new DataSource(typeormConfig).initialize(); // we dont use deprecated connection class here! yippee
+    const AppDataSource = await new DataSource(typeormConfig).initialize();
     fastify.decorate('psqlDB', {
       messages: AppDataSource.getRepository(messages),
       users: AppDataSource.getRepository(users),

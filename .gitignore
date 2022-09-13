@@ -28,6 +28,7 @@ build/Release
 
 /dist
 .env
+app.yaml
 
 # Dependency directories
 node_modules

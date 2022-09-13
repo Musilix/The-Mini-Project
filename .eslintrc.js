@@ -28,5 +28,6 @@ module.exports = {
         endOfLine: 'auto',
       },
     ],
+    'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
   },
 };

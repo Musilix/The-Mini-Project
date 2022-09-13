@@ -11,6 +11,7 @@ import dbConnector from './plugins/PSQLDbConnector';
 // For working locally with env vars
 dotenv.config();
 const server: FastifyInstance = fastify();
+const port: number = parseInt(`${process.env.PORT}`, 10) || 8080;
 
 // server.register(fp(fastifySwagger), SwaggerConfig);//
 server.register(dbConnector);
@@ -20,7 +21,7 @@ server.register(MessagesRoutes);
 server.register(UsersRoute);
 
 // listen on 8080 locally
-server.listen({ port: 8080 }, (err, address) => {
+server.listen({ port: port }, (err, address) => {
   if (err) {
     console.error(err);
     process.exit(1);
