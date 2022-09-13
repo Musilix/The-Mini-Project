@@ -11,9 +11,11 @@ import dbConnector from './plugins/PSQLDbConnector';
 // For working locally with env vars
 dotenv.config();
 const server: FastifyInstance = fastify();
-const port: number = parseInt(`${process.env.PORT}`, 10) || 8080;
+const serverOpts = {
+  port: parseInt(`${process.env.PORT}`, 10) || 8080,
+  host: `${process.env.DO_HOST}` || '127.0.0.1',
+};
 
-// server.register(fp(fastifySwagger), SwaggerConfig);//
 server.register(dbConnector);
 console.info('db registered');
 
@@ -29,11 +31,10 @@ server.get('/', async () => {
   };
 });
 
-// listen on 8080 locally
-server.listen({ port: port }, (err, address) => {
+server.listen(serverOpts, (err, address) => {
   if (err) {
     console.error(err);
     process.exit(1);
   }
-  console.log(`Server listening at ${address}`);
+  console.info(`Server listening at ${address}`);
 });
