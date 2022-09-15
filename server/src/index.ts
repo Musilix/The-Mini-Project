@@ -8,25 +8,34 @@ import * as dotenv from 'dotenv';
 import UsersRoute from './modules/users/routes';
 import dbConnector from './plugins/PSQLDbConnector';
 
+import cors from '@fastify/cors';
+
 // For working locally with env vars
 dotenv.config();
+//t
 const server: FastifyInstance = fastify();
 const serverOpts = {
   port: parseInt(`${process.env.PORT}`, 10) || 8080,
-  host: `${process.env.DO_HOST}` || '127.0.0.1',
+  host: process.env.DO_HOST || '127.0.0.1',
 };
 
-server.register(dbConnector);
-console.info('db registered');
+// Server and frontend are on different domains atm
+server.register(cors, {
+  origin: process.env.CORS_ORIGIN,
+});
 
+server.register(dbConnector);
 server.register(MessagesRoutes);
 server.register(UsersRoute);
 
 server.get('/', async () => {
+  //TODO: return root page from web frontend?
+
+  //placeholder
   return {
     statusCode: 200,
     code: 'Success',
-    message: 'hello mawmaw',
+    message: "WE'RE UP AND RUNNIN",
     time: new Date(),
   };
 });

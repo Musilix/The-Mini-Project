@@ -2,6 +2,7 @@ import { FastifyPluginCallback, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import { Repository } from 'typeorm';
 import messages from '../messages/entity';
+
 import { postMessageSchema } from './schema';
 
 const MessagesRoutes: FastifyPluginCallback = (fastify, _, done) => {
@@ -25,8 +26,27 @@ const MessagesRoutes: FastifyPluginCallback = (fastify, _, done) => {
   });
 
   // GET messages for a user
-  fastify.get('/messages/:id', async () => {
-    return 1;
+  fastify.get('/messages/:user_id', async (req: UserRequest) => {
+    try {
+      const messagesTable: Repository<messages> = fastify.psqlDB.messages;
+
+      let messages: messages[] = await messagesTable.find({
+        where: {
+          user_id: req.params.user_id,
+        },
+      });
+
+      return messages;
+    } catch (e) {
+      console.error('wah wah');
+      return {
+        statusCode: 500,
+        code: 'Internal server error',
+        message: `Error retrieving message for user-${req.params.user_id}`,
+        error: e,
+        time: new Date(),
+      };
+    }
   });
 
   // POST message for a given user
@@ -42,6 +62,13 @@ const MessagesRoutes: FastifyPluginCallback = (fastify, _, done) => {
           message: req.body.message,
         });
         await messagesTable.save(newMessage);
+
+        return {
+          statusCode: 200,
+          code: 'Success',
+          message: `Successfully added Message for user-${req.params.user_id}`,
+          time: new Date(),
+        };
       } catch (e) {
         console.error('wah wah');
         return {
@@ -52,13 +79,6 @@ const MessagesRoutes: FastifyPluginCallback = (fastify, _, done) => {
           time: new Date(),
         };
       }
-
-      return {
-        statusCode: 200,
-        code: 'Success',
-        message: `Successfully added Message for user-${req.params.user_id}`,
-        time: new Date(),
-      };
     }
   );
 

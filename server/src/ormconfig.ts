@@ -1,19 +1,20 @@
 import * as dotenv from 'dotenv';
 import tls, { PeerCertificate } from 'node:tls';
 import { DataSourceOptions } from 'typeorm';
+import { __prod__ } from './constants';
 
 dotenv.config();
 
 export default {
   type: 'postgres',
-  port: 5432,
+  port: process.env.DB_PORT,
   host: process.env.DB_HOST,
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   logging: true,
-  synchronize: false,
-  ssl: { ...getSSLConfig() },
+  synchronize: __prod__,
+  ssl: getSSLConfig(),
   entities: ['dist/modules/**/entity.js'],
   migrations: ['dist/migration/**/*.ts'],
   subscribers: ['src/subscriber/**/*.ts'],
@@ -22,8 +23,12 @@ export default {
 function getSSLConfig() {
   if (process.env.SSL_CA && process.env.SSL_CERT && process.env.SSL_KEY) {
     return {
-      checkServerIdentity: (_nohost: string, cert: PeerCertificate) => {
-        return tls.checkServerIdentity(process.env.DB_CN!, cert);
+      checkServerIdentity: (nohost: string, cert: PeerCertificate) => {
+        if (process.env.DB_CN) {
+          return tls.checkServerIdentity(process.env.DB_CN!, cert);
+        }
+
+        return tls.checkServerIdentity(nohost, cert);
       },
       sslmode: 'verify-full',
       ca: process.env.SSL_CA.replace(/\\n/g, '\n'),
@@ -32,5 +37,6 @@ function getSSLConfig() {
     };
   }
 
-  return {};
+  // no ssl on local dev
+  return false;
 }
