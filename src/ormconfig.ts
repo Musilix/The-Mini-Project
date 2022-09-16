@@ -16,6 +16,7 @@ export default {
   logging: !__prod__,
   synchronize: !__prod__,
   ssl: getSSLConfig(),
+  migrationsRun: __prod__, // TODO: Maybe don't do this... but seems like a good way to run any new generated migrations in prod to propogate changes for now
 
   /* TODO: possibly switch this back to only use the files found in the dist folder...
    * I'm kinda fuckin confused rn... I remember there was some reason I had pointed my entities, migrations, subs to the dist folder, but can't fully recall what it was...
@@ -23,7 +24,7 @@ export default {
    * but I'm not sure if it's better practice to just generate migration from the JS files that get built into the dist
    */
   entities: [path.join(__dirname, '/modules/**/entity.{ts,js}')], // Future Note: Keep in mind that if you are going to generate a migration, you must build the project after any changes to entities, as we set entities to point to the dist folder her
-  migrations: ['dist/migrations/**/*.js'], //when running migration:run, it will use the JS files in the dist, so build project after generating migrations
+  migrations: ['dist/migrations/**/*.js'], //when running migration:run, it will use the JS files in the dist, so build project after generating migrations. Maybe best to keep it as dist, as we will usually be running the migrations in prod (dist)
   subscribers: ['src/subscriber/**/*.ts'],
 } as DataSourceOptions;
 
