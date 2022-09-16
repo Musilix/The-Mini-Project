@@ -16,7 +16,7 @@ export default class messages {
   @PrimaryGeneratedColumn()
   message_id: number;
 
-  @Column()
+  @Column({ nullable: false })
   message: string;
 
   @CreateDateColumn()

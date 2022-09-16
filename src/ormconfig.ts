@@ -16,7 +16,7 @@ export default {
   synchronize: !__prod__,
   ssl: getSSLConfig(),
   entities: ['dist/modules/**/entity.js'],
-  migrations: ['dist/migration/**/*.ts'],
+  migrations: ['dist/migrations/**/*.js'],
   subscribers: ['src/subscriber/**/*.ts'],
 } as DataSourceOptions;
 
