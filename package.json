@@ -13,7 +13,8 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "typeorm": "typeorm-ts-node-esm -d ./src/MigrationDataSource.ts",
-    "gen-mig": "npm run typeorm -- migration:generate ./src/migrations/UsersAndMessagesCreation"
+    "gen-mig": "npm run typeorm -- migration:generate ./src/migrations/UsersAndMessagesCreation",
+    "run-mig": "typeorm-ts-node-esm migration:run"
   },
   "keywords": [],
   "author": "",
