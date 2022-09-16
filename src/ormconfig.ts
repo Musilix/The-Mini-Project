@@ -13,7 +13,7 @@ export default {
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   logging: true,
-  synchronize: __prod__,
+  synchronize: !__prod__,
   ssl: getSSLConfig(),
   entities: ['dist/modules/**/entity.js'],
   migrations: ['dist/migration/**/*.ts'],

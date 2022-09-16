@@ -32,7 +32,7 @@ const MessagesRoutes: FastifyPluginCallback = (fastify, _, done) => {
 
       let messages: messages[] = await messagesTable.find({
         where: {
-          user_id: req.params.user_id,
+          user: { user_id: req.params.user_id },
         },
       });
 
@@ -58,8 +58,11 @@ const MessagesRoutes: FastifyPluginCallback = (fastify, _, done) => {
         const messagesTable: Repository<messages> = fastify.psqlDB.messages;
 
         const newMessage = messagesTable.create({
-          user_id: req.params.user_id,
+          // Future Note: I didn't realize that once we have a true relation defined beteween 2 entities, we will have to go through that relational column (in this case 'user' of type users)
+          // and then through that we define the actual FK field we are interested in (in this case, user_id of the users type)
+          user: { user_id: req.params.user_id },
           message: req.body.message,
+          // completelyRandomColumnForNoReason: 'yeah buddy',
         });
         await messagesTable.save(newMessage);
 
