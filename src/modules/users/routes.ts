@@ -1,23 +1,48 @@
+// import { Session } from '@mgcrea/fastify-session';
+import { Session } from '@mgcrea/fastify-session';
 import { FastifyPluginCallback, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import { Repository } from 'typeorm';
-// import messages from '../messages/entity';
 import users from './entity';
+/* 
+  *This is NOT the way fastify-session or mcgrea/fastify-session recommended augmenting the module that contained session fields, but their recommended methods DIDNT work,
+  *so I found out how to actually make it work by directly augmenting the Session on the fastify module itself.
+
+  *The fastify session module augments the Session interface (that resides in the fastify module) with it' own SessionDetails namespace/internal interface. (Session extends SessionDetails)
+  *his adds the fields defined in the Sessiondetails to the Session interface. So we can just do the same directly to the Session interface for the fields we want to define on the session (in our case, userId)
+*/
+
+// declare module '@mgcrea/fastify-session' {
+//   interface Session<T extends SessionData = SessionData> {
+//     userId: string;
+//   }
+// }
+
+declare module '@mgcrea/fastify-session' {
+  interface SessionData {
+    userId: string;
+  }
+}
 
 const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
+  //TODO: Abstract out of file
   type UserRequest = FastifyRequest<{
+    // session: Session;
     Params: { user_id: number };
     Body: { user_name: string; user_age: string };
+    Querystring: { id: string };
   }>;
 
   // Get all active Users
   fastify.get('/users', async () => {
     const usersTable: Repository<users> = fastify.psqlDB.users;
-    let users: users[] = await usersTable.find();
+    let users: users[] = await usersTable.find({
+      relations: { messages: true },
+    });
     return users;
   });
 
-  // TODO: return details on user + messages attached to user
+  // Get details on user
   fastify.get('/users/:user_id', async (req: UserRequest) => {
     try {
       const usersTable: Repository<users> = fastify.psqlDB.users;
@@ -69,8 +94,50 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
     }
   });
 
+  fastify.post('/iam', async (req: UserRequest) => {
+    try {
+      req.session.set('userId', req.query.id);
+
+      // This DOESNT work
+      // req.session.userId = req.query.id;
+      return {
+        message: `You are signed in under userId ${req.query.id}`,
+      };
+    } catch (e) {
+      console.error();
+      return {
+        error: '501',
+        message: 'Error Setting Session Details',
+      };
+    }
+  });
+
+  fastify.get('/whoami', async (req: UserRequest) => {
+    try {
+      const usersTable: Repository<users> = fastify.psqlDB.users;
+      const userSession: Session = req.session;
+
+      // No Cookie sent for fastify-session to decrypt and verify
+      if (!userSession.get('userId')) {
+        return null;
+      }
+
+      const user = usersTable.find({
+        where: { user_id: parseInt(userSession.get('userId')!) },
+      });
+
+      return user;
+    } catch (e) {
+      console.error();
+      return {
+        error: '501',
+        message: 'Error Retrieving Session Details',
+      };
+    }
+  });
+
   // TODO: set up join query to return messages related to a given user name (use user_id PK)
-  // fastify.get('/users/:user_name/messages', async () => {
+  // fastify.get('/:user_name/messages', async () => {
   //   const messagesTable: Repository<messages> = fastify.psqlDB.messages;
   //   const userMessages: messages[] = await messagesTable.find({
   //     where:

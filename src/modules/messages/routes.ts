@@ -20,7 +20,11 @@ const MessagesRoutes: FastifyPluginCallback = (fastify, _, done) => {
   fastify.get('/messages', async () => {
     const messagesTable: Repository<messages> = fastify.psqlDB.messages;
 
-    let messages: messages[] = await messagesTable.find();
+    let messages: messages[] = await messagesTable.find({
+      relations: {
+        user: true,
+      },
+    });
 
     return messages;
   });
