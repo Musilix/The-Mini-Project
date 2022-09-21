@@ -22,7 +22,8 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    // "typeRoots": ["./typing-stubs", "./node_modules/@types"] If we abstract out some declarations and module augmentations to a typing-stub, we should use this
   },
   "exclude": ["node_modules", "**/*.d.ts", "**/*.spec.ts"],
   "include": ["./src/**/*.ts"]
