@@ -12,6 +12,9 @@ export default class users {
   @Column({ type: 'varchar', length: 3, nullable: true })
   user_age: string;
 
-  @OneToMany(() => messages, (messages) => messages.user)
+  @OneToMany(() => messages, (messages) => messages.user, {
+    eager: false,
+    orphanedRowAction: 'soft-delete',
+  })
   messages: messages[];
 }
