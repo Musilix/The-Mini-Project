@@ -14,7 +14,7 @@ export default {
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   logging: !__prod__,
-  synchronize: false,
+  synchronize: !__prod__, // I thought it may have been a bad idea to sync in local, but ultimately... as you make changes in dev, you only wanna generate a mig for the final decision. Having sync to false and running a mig everytime yo uwanna look at some possible changes would create a lot of bloat mig files which is unecessary
   ssl: getSSLConfig(),
   migrationsRun: __prod__, // TODO: Maybe don't do this... but seems like a good way to run any new generated migrations in prod to propogate changes for now
 
