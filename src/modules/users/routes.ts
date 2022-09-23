@@ -29,7 +29,7 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
   type UserRequest = FastifyRequest<{
     // session: Session;
     Params: { user_id: number };
-    Body: { user_name: string; user_age: string };
+    Body: { username: string; user_age: string };
     Querystring: { id: string };
   }>;
 
@@ -70,7 +70,7 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
     try {
       const usersTable: Repository<users> = fastify.psqlDB.users;
       const newUser = usersTable.create({
-        user_name: req.body.user_name,
+        username: req.body.username,
         user_age: req.body.user_age,
       });
 
@@ -137,7 +137,7 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
   });
 
   // TODO: set up join query to return messages related to a given user name (use user_id PK)
-  // fastify.get('/:user_name/messages', async () => {
+  // fastify.get('/:username/messages', async () => {
   //   const messagesTable: Repository<messages> = fastify.psqlDB.messages;
   //   const userMessages: messages[] = await messagesTable.find({
   //     where:

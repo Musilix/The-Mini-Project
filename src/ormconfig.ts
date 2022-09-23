@@ -14,7 +14,7 @@ export default {
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   logging: !__prod__,
-  synchronize: !__prod__,
+  synchronize: false,
   ssl: getSSLConfig(),
   migrationsRun: __prod__, // TODO: Maybe don't do this... but seems like a good way to run any new generated migrations in prod to propogate changes for now
 

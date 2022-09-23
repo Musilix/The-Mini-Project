@@ -7,7 +7,7 @@ export default class users {
   user_id!: number;
 
   @Column({ type: 'varchar', length: 255, nullable: false, default: 'Anon' })
-  user_name: string;
+  username: string;
 
   @Column({ type: 'varchar', length: 3, nullable: true })
   user_age: string;
