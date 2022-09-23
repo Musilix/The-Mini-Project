@@ -28,7 +28,7 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
   //TODO: Abstract out of file
   type UserRequest = FastifyRequest<{
     // session: Session;
-    Params: { user_id: number };
+    Params: { user_id: number; username: string };
     Body: { username: string; user_age: string };
     Querystring: { id: string };
   }>;
@@ -37,7 +37,11 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
   fastify.get('/users', async () => {
     const usersTable: Repository<users> = fastify.psqlDB.users;
     let users: users[] = await usersTable.find({
-      relations: { messages: true },
+      select: {
+        username: true,
+        user_age: true,
+      },
+      relations: { messages: false },
     });
     return users;
   });
@@ -48,6 +52,10 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
       const usersTable: Repository<users> = fastify.psqlDB.users;
       let specificUser: users = (
         await usersTable.find({
+          select: {
+            username: true,
+            user_age: true,
+          },
           where: { user_id: req.params.user_id },
         })
       )[0];
@@ -58,7 +66,32 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
       return {
         statusCode: 500,
         code: 'Internal server error',
-        message: `Error adding retrieving User-${req.params.user_id}`,
+        message: `Error retrieving User-${req.params.user_id}`,
+        error: e,
+        time: new Date(),
+      };
+    }
+  });
+
+  fastify.get('/:username/messages', async (req: UserRequest) => {
+    try {
+      const usersTable: Repository<users> = fastify.psqlDB.users;
+      const userMessages = await usersTable.find({
+        relations: {
+          messages: true,
+        },
+        where: {
+          username: req.params.username,
+        },
+      });
+
+      return userMessages[0].messages; // This is assuming usernames are unique so we only care about the first (and only) user returned here
+    } catch (e) {
+      console.error('wah wahmp');
+      return {
+        statusCode: 500,
+        code: 'Internal server error',
+        message: `Error retrieving messages for ${req.params.username}`,
         error: e,
         time: new Date(),
       };
@@ -96,6 +129,7 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
 
   fastify.post('/iam', async (req: UserRequest) => {
     try {
+      // Set up session object with a userId field so we can retrieve necessary (specific) user details when we need
       req.session.set('userId', req.query.id);
 
       // This DOESNT work

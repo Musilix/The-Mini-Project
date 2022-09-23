@@ -22,7 +22,7 @@ const MessagesRoutes: FastifyPluginCallback = (fastify, _, done) => {
 
     let messages: messages[] = await messagesTable.find({
       relations: {
-        user: true,
+        user: false,
       },
     });
 
@@ -30,28 +30,28 @@ const MessagesRoutes: FastifyPluginCallback = (fastify, _, done) => {
   });
 
   // GET messages for a user
-  fastify.get('/messages/:user_id', async (req: UserRequest) => {
-    try {
-      const messagesTable: Repository<messages> = fastify.psqlDB.messages;
+  // fastify.get('/messages/:user_id', async (req: UserRequest) => {
+  //   try {
+  //     const messagesTable: Repository<messages> = fastify.psqlDB.messages;
 
-      let messages: messages[] = await messagesTable.find({
-        where: {
-          user: { user_id: req.params.user_id },
-        },
-      });
+  //     let messages: messages[] = await messagesTable.find({
+  //       where: {
+  //         user: { user_id: req.params.user_id },
+  //       },
+  //     });
 
-      return messages;
-    } catch (e) {
-      console.error('wah wah');
-      return {
-        statusCode: 500,
-        code: 'Internal server error',
-        message: `Error retrieving message for user-${req.params.user_id}`,
-        error: e,
-        time: new Date(),
-      };
-    }
-  });
+  //     return messages;
+  //   } catch (e) {
+  //     console.error('wah wah');
+  //     return {
+  //       statusCode: 500,
+  //       code: 'Internal server error',
+  //       message: `Error retrieving message for user-${req.params.user_id}`,
+  //       error: e,
+  //       time: new Date(),
+  //     };
+  //   }
+  // });
 
   // POST message for a given user
   fastify.post(
