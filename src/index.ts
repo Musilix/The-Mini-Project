@@ -44,7 +44,7 @@ server.register(fastifySession, {
   secret: process.env.SESS_SALT!, // The salt we use to has a cookie on the server side
   cookieName: 'qid', // just a cookie name
   cookie: {
-    maxAge: 60 * 3, // 3 mins - sets expire date by date.now() + maxAge
+    maxAge: 60 * 60, // 1hr  - sets expire date by date.now() + maxAge
     httpOnly: true, // stops JS from being able to access cookie details on client side
     sameSite: 'lax',
     secure: __prod__, // cookie is sent to server only when request is made with https
