@@ -76,16 +76,33 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
   fastify.get('/:username/messages', async (req: UserRequest) => {
     try {
       const usersTable: Repository<users> = fastify.psqlDB.users;
-      const userMessages = await usersTable.find({
-        relations: {
-          messages: true,
-        },
-        where: {
-          username: req.params.username,
-        },
+      const user = await usersTable.findOne({
+        select: { user_id: true },
+        where: { username: req.params.username },
       });
 
-      return userMessages[0].messages; // This is assuming usernames are unique so we only care about the first (and only) user returned here
+      // No user with that username found
+      if (!user) {
+        return {
+          statusCode: 404,
+          code: 'Not Found',
+          message: `User by the name ${req.params.username} was not found`,
+          time: new Date(),
+        };
+      }
+
+      const userMessages = await usersTable
+        .createQueryBuilder('user') // This will be the alias we refer to our Entity A (in this case, the "users" table)
+        .innerJoin('user.messages', 'messages', 'messages.user_id = :id', {
+          id: user.user_id,
+        }) //join our 2 tables and store it under the alias "messages". Any row in the users and messages table which has the user_id of user.use_id will be added to this temp table
+        .select([
+          'messages.message as message',
+          'messages.posting_date as posting_date',
+        ]) //select the fields we need (under any alias we'd like)
+        .getRawMany(); //since what we're working with wasnt a true entity, but rather a middleground temp alias ("messages"), it isn't register as an entity, so getMany() doesn't work to execute and retrieve. We need to run getRawMany()
+
+      return userMessages;
     } catch (e) {
       console.error('wah wahmp');
       return {
@@ -107,6 +124,7 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
         user_age: req.body.user_age,
       });
 
+      // TODO: Switch to use the queryBUilder here as it is more optimal in the case of inserting a new object into a DB filled with a lot of items
       await usersTable.save(newUser);
 
       return {
@@ -169,14 +187,6 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
       };
     }
   });
-
-  // TODO: set up join query to return messages related to a given user name (use user_id PK)
-  // fastify.get('/:username/messages', async () => {
-  //   const messagesTable: Repository<messages> = fastify.psqlDB.messages;
-  //   const userMessages: messages[] = await messagesTable.find({
-  //     where:
-  //   })
-  // })
 
   done();
 };
