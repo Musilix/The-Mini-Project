@@ -6,7 +6,7 @@ export default class users {
   @PrimaryGeneratedColumn({ type: 'integer' })
   user_id!: number;
 
-  @Column({ type: 'varchar', length: 255, nullable: false, default: 'Anon' })
+  @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
   username: string;
 
   @Column({ type: 'varchar', length: 3, nullable: true })
