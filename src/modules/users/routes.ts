@@ -47,26 +47,24 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
   });
 
   // Get details on user
-  fastify.get('/users/:user_id', async (req: UserRequest) => {
+  fastify.get('/:username', async (req: UserRequest) => {
     try {
       const usersTable: Repository<users> = fastify.psqlDB.users;
-      let specificUser: users = (
-        await usersTable.find({
-          select: {
-            username: true,
-            user_age: true,
-          },
-          where: { user_id: req.params.user_id },
-        })
-      )[0];
+
+      let specificUser: users | null = await usersTable.findOne({
+        select: {
+          username: true,
+          user_age: true,
+        },
+        where: { username: req.params.username },
+      });
 
       return specificUser;
     } catch (e) {
-      console.error('wah wah');
       return {
         statusCode: 500,
         code: 'Internal server error',
-        message: `Error retrieving User-${req.params.user_id}`,
+        message: `Error retrieving details on${req.params.username}`,
         error: e,
         time: new Date(),
       };
@@ -75,6 +73,7 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
 
   fastify.get('/:username/messages', async (req: UserRequest) => {
     try {
+      //TODO: abstract out to /:username endpoint in here?
       const usersTable: Repository<users> = fastify.psqlDB.users;
       const user = await usersTable.findOne({
         select: { user_id: true },
@@ -104,7 +103,6 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
 
       return userMessages;
     } catch (e) {
-      console.error('wah wahmp');
       return {
         statusCode: 500,
         code: 'Internal server error',
@@ -124,8 +122,12 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
         user_age: req.body.user_age,
       });
 
-      // TODO: Switch to use the queryBUilder here as it is more optimal in the case of inserting a new object into a DB filled with a lot of items
-      await usersTable.save(newUser);
+      await usersTable
+        .createQueryBuilder('user') // This will be the alias we refer to our Entity A (in this case, the "users" table)
+        .insert()
+        .into(users)
+        .values([newUser])
+        .execute();
 
       return {
         statusCode: 200,
@@ -134,31 +136,22 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
         time: new Date(),
       };
     } catch (e) {
-      console.error('wah wah');
+      let errMsg = '';
+      if (e.code === '23505') {
+        errMsg = 'User already exists';
+      } else {
+        errMsg =
+          "Something went wrong, but we don't know what. Try creating an account again.";
+      }
+
       return {
         statusCode: 500,
         code: 'Internal server error',
-        message: `Error adding new User`,
+        message: errMsg,
         error: e,
         time: new Date(),
       };
     }
-  });
-
-  fastify.post('/iwannabe', async (req: UserRequest) => {
-    const usersTable: Repository<users> = await fastify.psqlDB.users;
-
-    const newUser = usersTable.create({
-      username: req.body.username,
-      user_age: req.body.user_age,
-    });
-
-    await usersTable
-      .createQueryBuilder('user') // This will be the alias we refer to our Entity A (in this case, the "users" table)
-      .insert()
-      .into(users)
-      .values([newUser])
-      .execute();
   });
 
   fastify.post('/iam', async (req: UserRequest) => {
@@ -192,8 +185,6 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
 
   fastify.post('/iamnomore', async (req: UserRequest) => {
     if (req.session.get('userName')) {
-      console.log('we have a session to delete for this cookie');
-
       //remove cookie for user if they manually log out
       req.session.destroy();
 
@@ -217,27 +208,14 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
       // No Cookie sent for fastify-session to decrypt and verify
       if (!userSession.get('userName')) {
         return null;
-        // return {
-        //   status: 200,
-        //   message: 'No valid session',
-        // };
-
-        //TODO: OR?
-        // return {
-        //   status: 401,
-        //   message: 'No valid session in place',
-        // };
       }
 
       const user = await usersTable.findOne({
         where: { username: userSession.get('userName')! },
       });
-
-      // console.log(JSON.stringify({ ...user }));
-
       return user;
     } catch (e) {
-      console.error();
+      console.error(e);
       return {
         error: '501',
         message: 'Error Retrieving Session Details',
