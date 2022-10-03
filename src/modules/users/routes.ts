@@ -20,7 +20,7 @@ import users from './entity';
 
 declare module '@mgcrea/fastify-session' {
   interface SessionData {
-    userId: string;
+    userName: string;
   }
 }
 
@@ -145,23 +145,68 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
     }
   });
 
+  fastify.post('/iwannabe', async (req: UserRequest) => {
+    const usersTable: Repository<users> = await fastify.psqlDB.users;
+
+    const newUser = usersTable.create({
+      username: req.body.username,
+      user_age: req.body.user_age,
+    });
+
+    await usersTable
+      .createQueryBuilder('user') // This will be the alias we refer to our Entity A (in this case, the "users" table)
+      .insert()
+      .into(users)
+      .values([newUser])
+      .execute();
+  });
+
   fastify.post('/iam', async (req: UserRequest) => {
     try {
-      // Set up session object with a userId field so we can retrieve necessary (specific) user details when we need
-      req.session.set('userId', req.query.id);
+      if (req.session.get('userName')) {
+        return {
+          message: `You are already signed in under ${req.session.get(
+            'userName'
+          )}`,
+        };
+      }
+
+      // Set up session object with a userName field so we can retrieve necessary (specific) user details when we need
+      req.session.set('userName', req.body.username);
 
       // This DOESNT work
       // req.session.userId = req.query.id;
+
       return {
-        message: `You are signed in under userId ${req.query.id}`,
+        message: `You are signed in under ${req.body.username}`,
       };
     } catch (e) {
       console.error();
       return {
         error: '501',
-        message: 'Error Setting Session Details',
+        message: 'Error Signing in',
+        e: e,
       };
     }
+  });
+
+  fastify.post('/iamnomore', async (req: UserRequest) => {
+    if (req.session.get('userName')) {
+      console.log('we have a session to delete for this cookie');
+
+      //remove cookie for user if they manually log out
+      req.session.destroy();
+
+      return {
+        code: 200,
+        message: 'Logged out succesfully',
+      };
+    }
+
+    return {
+      status: 403,
+      message: 'How did you do that?',
+    };
   });
 
   fastify.get('/whoami', async (req: UserRequest) => {
@@ -170,13 +215,25 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
       const userSession: Session = req.session;
 
       // No Cookie sent for fastify-session to decrypt and verify
-      if (!userSession.get('userId')) {
+      if (!userSession.get('userName')) {
         return null;
+        // return {
+        //   status: 200,
+        //   message: 'No valid session',
+        // };
+
+        //TODO: OR?
+        // return {
+        //   status: 401,
+        //   message: 'No valid session in place',
+        // };
       }
 
-      const user = usersTable.find({
-        where: { user_id: parseInt(userSession.get('userId')!) },
+      const user = await usersTable.findOne({
+        where: { username: userSession.get('userName')! },
       });
+
+      // console.log(JSON.stringify({ ...user }));
 
       return user;
     } catch (e) {
