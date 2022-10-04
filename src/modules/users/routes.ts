@@ -3,7 +3,9 @@ import { Session } from '@mgcrea/fastify-session';
 import { FastifyPluginCallback, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import { Repository } from 'typeorm';
+import * as UserService from '../../services/UserService';
 import users from './entity';
+
 /* 
   *This is NOT the way fastify-session or mcgrea/fastify-session recommended augmenting the module that contained session fields, but their recommended methods DIDNT work,
   *so I found out how to actually make it work by directly augmenting the Session on the fastify module itself.
@@ -48,29 +50,10 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
 
   // Get details on user
   fastify.get('/:username', async (req: UserRequest) => {
-    try {
-      const usersTable: Repository<users> = fastify.psqlDB.users;
-
-      let specificUser: users | null = await usersTable.findOne({
-        select: {
-          username: true,
-          user_age: true,
-        },
-        where: { username: req.params.username },
-      });
-
-      return specificUser;
-    } catch (e) {
-      return {
-        statusCode: 500,
-        code: 'Internal server error',
-        message: `Error retrieving details on${req.params.username}`,
-        error: e,
-        time: new Date(),
-      };
-    }
+    return UserService.getUser(fastify, req.params.username);
   });
 
+  // TODO: move all this controller business logic junk to svc
   fastify.get('/:username/messages', async (req: UserRequest) => {
     try {
       //TODO: abstract out to /:username endpoint in here?

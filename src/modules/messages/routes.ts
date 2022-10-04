@@ -3,13 +3,15 @@ import fp from 'fastify-plugin';
 import { Repository } from 'typeorm';
 import messages from '../messages/entity';
 
+// import * as UserService from '../../services/UserService';
+import users from '../users/entity';
 import { postMessageSchema } from './schema';
 
 const MessagesRoutes: FastifyPluginCallback = (fastify, _, done) => {
   // must perform declaration merging on our req objects, so we can grab IDs of users making requests.
   type UserRequest = FastifyRequest<{
-    Params: { user_id: number; message_id: number };
-    Body: { message: string };
+    Params: { user_id: number; username: string; message_id: number };
+    Body: { username: string; message: string; user: users };
   }>;
 
   // NOTE that in all the callback funcitons provided to these fastify route handlers, we can make them async
@@ -29,65 +31,37 @@ const MessagesRoutes: FastifyPluginCallback = (fastify, _, done) => {
     return messages;
   });
 
-  // GET messages for a user
-  // fastify.get('/messages/:user_id', async (req: UserRequest) => {
-  //   try {
-  //     const messagesTable: Repository<messages> = fastify.psqlDB.messages;
-
-  //     let messages: messages[] = await messagesTable.find({
-  //       where: {
-  //         user: { user_id: req.params.user_id },
-  //       },
-  //     });
-
-  //     return messages;
-  //   } catch (e) {
-  //     console.error('wah wah');
-  //     return {
-  //       statusCode: 500,
-  //       code: 'Internal server error',
-  //       message: `Error retrieving message for user-${req.params.user_id}`,
-  //       error: e,
-  //       time: new Date(),
-  //     };
-  //   }
-  // });
-
   // POST message for a given user
-  fastify.post(
-    '/messages/:user_id',
-    postMessageSchema,
-    async (req: UserRequest) => {
-      try {
-        const messagesTable: Repository<messages> = fastify.psqlDB.messages;
+  fastify.post('/messages', postMessageSchema, async (req: UserRequest) => {
+    try {
+      const messagesTable: Repository<messages> = fastify.psqlDB.messages;
+      const userAdding = req.body.user;
 
-        const newMessage = messagesTable.create({
-          // Future Note: I didn't realize that once we have a true relation defined beteween 2 entities, we will have to go through that relational column (in this case 'user' of type users)
-          // and then through that we define the actual FK field we are interested in (in this case, user_id of the users type)
-          user: { user_id: req.params.user_id },
-          message: req.body.message,
-          // completelyRandomColumnForNoReason: 'yeah buddy',
-        });
-        await messagesTable.save(newMessage);
+      const newMessage = messagesTable.create({
+        // Future Note: I didn't realize that once we have a true relation defined beteween 2 entities, we will have to go through that relational column (in this case 'user' of type users)
+        // and then through that we define the actual FK field we are interested in (in this case, user_id of the users type)
+        user: { user_id: userAdding.user_id },
+        message: req.body.message,
+      });
 
-        return {
-          statusCode: 200,
-          code: 'Success',
-          message: `Successfully added Message for user-${req.params.user_id}`,
-          time: new Date(),
-        };
-      } catch (e) {
-        console.error('wah wah');
-        return {
-          statusCode: 500,
-          code: 'Internal server error',
-          message: `Error adding message for user-${req.params.user_id}`,
-          error: e,
-          time: new Date(),
-        };
-      }
+      await messagesTable.save(newMessage);
+
+      return {
+        statusCode: 200,
+        code: 'Success',
+        message: `Successfully added Message for ${req.body.user.username}`,
+        time: new Date(),
+      };
+    } catch (e) {
+      return {
+        statusCode: 500,
+        code: 'Internal server error',
+        message: `Error adding message for ${req.body.user.username}`,
+        error: e,
+        time: new Date(),
+      };
     }
-  );
+  });
 
   // DELETE all messages
 
