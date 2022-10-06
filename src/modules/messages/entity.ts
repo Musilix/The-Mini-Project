@@ -20,7 +20,7 @@ export default class messages {
   @Column({ type: 'varchar', length: 255, nullable: false })
   message: string;
 
-  @CreateDateColumn({ type: 'date', nullable: false })
+  @CreateDateColumn({ type: 'timestamp', nullable: false })
   posting_date: Date;
 
   @ManyToOne(() => users, (users) => users.messages, {
