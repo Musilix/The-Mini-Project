@@ -36,6 +36,7 @@ const redisStore = new RedisStore({
 server.register(cors, {
   origin: process.env.CORS_ORIGIN,
   credentials: true,
+  methods: ['GET', 'POST', 'DELETE', 'PUT', 'OPTIONS'],
 });
 
 server.register(fastifyCookie);

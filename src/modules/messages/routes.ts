@@ -63,6 +63,35 @@ const MessagesRoutes: FastifyPluginCallback = (fastify, _, done) => {
     }
   });
 
+  fastify.put('/message/:message_id', async (req: UserRequest) => {
+    try {
+      const messagesTable: Repository<messages> = fastify.psqlDB.messages;
+      await messagesTable
+        .createQueryBuilder('messages')
+        .update(messages)
+        .set({ message: req.body.message })
+        .where('message_id = :message_id', {
+          message_id: req.params.message_id,
+        })
+        .execute();
+
+      return {
+        statusCode: 200,
+        code: 'Success',
+        message: `Successfully updated Message with an ID of ${req.params.message_id}`,
+        time: new Date(),
+      };
+    } catch (e) {
+      return {
+        statusCode: 500,
+        code: 'Internal server error',
+        message: `Error updating message-${req.params.message_id}`,
+        error: e,
+        time: new Date(),
+      };
+    }
+  });
+
   // DELETE all messages
 
   // DELETE all messages for a given user
@@ -79,7 +108,6 @@ const MessagesRoutes: FastifyPluginCallback = (fastify, _, done) => {
           message_id: req.params.message_id,
         });
       } catch (e) {
-        console.error('wah wah');
         return {
           statusCode: 500,
           code: 'Internal server error',

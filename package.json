@@ -15,7 +15,7 @@
     "typeorm": "typeorm-ts-node-esm -d ./src/MigrationDataSource.ts",
     "typeorm:prod": "typeorm-ts-node-esm -d ./src/MigrationDataSourceProd.ts",
     "gen-mig:dev": "npm run typeorm -- migration:generate ./src/migrations/UsersAndMessagesCreation",
-    "gen-mig:prod": "npm run typeorm:prod -- migration:generate ./src/migrations/ChangeMessageDateToTimestamp",
+    "gen-mig:prod": "npm run typeorm:prod -- migration:generate ./src/migrations/ChangedDeleteNameAndAddEditCol",
     "run-mig": "typeorm-ts-node-esm migration:run -d ./src/MigrationDataSource.ts"
   },
   "keywords": [],

@@ -40,6 +40,7 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
     const usersTable: Repository<users> = fastify.psqlDB.users;
     let users: users[] = await usersTable.find({
       select: {
+        user_id: true,
         username: true,
         user_age: true,
       },
@@ -79,6 +80,7 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
           id: user.user_id,
         }) //join our 2 tables and store it under the alias "messages". Any row in the users and messages table which has the user_id of user.use_id will be added to this temp table
         .select([
+          'messages.message_id as id',
           'messages.message as message',
           'messages.posting_date as posting_date',
         ]) //select the fields we need (under any alias we'd like)

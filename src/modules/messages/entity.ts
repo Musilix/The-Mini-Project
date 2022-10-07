@@ -7,6 +7,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 import users from '../users/entity';
@@ -30,7 +31,10 @@ export default class messages {
   user: users;
 
   @DeleteDateColumn()
-  deletedAt: Date;
+  deleted_at: Date;
+
+  @UpdateDateColumn()
+  edited_on: Date;
 
   // We can add a new, non-nullable field to our entity if we already have data in the table - as each of the existing rows in the table would set this field as null, causing an error
   // Instead, we have to set it as nullable, run the migration for the newly added field, change it back to non-nullable, and then run the migration again thereafter...?
