@@ -83,6 +83,7 @@ const UsersRoute: FastifyPluginCallback = (fastify, _, done) => {
           'messages.message_id as id',
           'messages.message as message',
           'messages.posting_date as posting_date',
+          'messages.edited_on as edit_date',
         ]) //select the fields we need (under any alias we'd like)
         .getRawMany(); //since what we're working with wasnt a true entity, but rather a middleground temp alias ("messages"), it isn't register as an entity, so getMany() doesn't work to execute and retrieve. We need to run getRawMany()
 
