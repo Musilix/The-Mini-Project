@@ -27,6 +27,11 @@ export default class messages {
   @ManyToOne(() => users, (users) => users.messages, {
     eager: false,
   })
+  // name field here is what typeorm will use here to define a name for the FK we want to create
+  // if nothing is provided, it will take the name of the field and add "id" to the end of it.. nuh uh
+
+  // referencedColumnName here will be the name within the entity B (the FK holder) class
+  // it needs to be an actual name
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'user_id' }])
   user: users;
 
