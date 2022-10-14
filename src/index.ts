@@ -16,8 +16,11 @@ import RedisStore from '@mgcrea/fastify-session-redis-store';
 import Redis from 'ioredis';
 import { __prod__ } from './constants';
 
+import multer from 'fastify-multer';
+
 // For working locally with env vars
 dotenv.config();
+
 const server: FastifyInstance = fastify();
 const serverOpts = {
   port: parseInt(`${process.env.PORT}`, 10) || 8080,
@@ -56,6 +59,7 @@ server.register(fastifySession, {
 });
 
 server.register(dbConnector);
+server.register(multer.contentParser);
 server.register(MessagesRoutes);
 server.register(UsersRoute);
 
